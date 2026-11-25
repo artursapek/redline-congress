@@ -1,0 +1,35 @@
+// Local development config. Local D1/R2 are simulated, so these IDs are
+// placeholders. To deploy, copy this to wrangler.production.jsonc (gitignored),
+// fill in your own D1 database_id and routes, and run `npm run deploy`.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "redlinecongress",
+  "main": "worker/index.ts",
+  "workers_dev": true,
+  "compatibility_date": "2025-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "run_worker_first": ["/", "/api/*", "/sitemap.xml", "/robots.txt"]
+  },
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "redlinecongress-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "XML_BUCKET",
+      "bucket_name": "redlinecongress-xml"
+    }
+  ]
+}

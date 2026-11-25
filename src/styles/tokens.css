@@ -1,0 +1,143 @@
+/* Design tokens (warm paper palette, typography, diff ink) */
+
+:root,
+.light-theme {
+  color-scheme: light;
+
+  --font-ui: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Raw Revise warm palette */
+  --palette-cream: #f9f7f5;
+  --palette-cream-light: #f8f7f7;
+  --palette-sand: #e8e0dd;
+  --palette-espresso: #3c3430;
+  --palette-bark: #47413e;
+  --palette-stone: #655b56;
+  --palette-clay: #897e79;
+  --palette-azure: #3f90ce;
+  --palette-azure-deep: #1d587d;
+  --palette-grass: #67ad69;
+
+  /* Surfaces */
+  --surface-page: #ffffff;
+  --surface-warm: var(--palette-cream);
+  --surface-warm-sunken: #f4f1ee;
+  --surface-warm-raised: var(--palette-sand);
+  --surface-card: #ffffff;
+  --surface-hover: #f5f2ef;
+  --surface-header: rgba(255, 255, 255, 0.88);
+  --canvas-bg: #f3f0ec;
+  --editor-paper: #ffffff;
+  --editor-paper-border: rgba(71, 65, 62, 0.13);
+
+  /* Text */
+  --content-strong: var(--palette-espresso);
+  --content-default: var(--palette-bark);
+  --content-muted: var(--palette-stone);
+  --content-subtle: var(--palette-clay);
+
+  /* Accents */
+  --brand-accent: var(--palette-azure);
+  --brand-accent-strong: var(--palette-azure-deep);
+  --brand-accent-soft: #eaf3fa;
+  --brand-on-accent: #ffffff;
+
+  /* Borders & hairlines */
+  --warm-border: color-mix(in srgb, var(--palette-bark), transparent 88%);
+  --warm-border-strong: color-mix(in srgb, var(--palette-bark), transparent 78%);
+  --v3-rule: color-mix(in srgb, var(--palette-bark), transparent 86%);
+  --v3-rule-gradient: linear-gradient(
+    90deg,
+    transparent,
+    var(--v3-rule) 49.5%,
+    transparent
+  );
+
+  /* Tracked-change ink & wash */
+  --diff-insert-text: #0b8237;
+  --diff-delete-text: #cf2a2a;
+  --diff-insert-wash: rgba(34, 197, 94, 0.09);
+  --diff-delete-wash: rgba(207, 42, 42, 0.1);
+  --diff-insert-border: rgba(11, 130, 55, 0.24);
+  --diff-delete-border: rgba(207, 42, 42, 0.24);
+
+  /* Elevation */
+  --shadow-card: 0 2px 2px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(60, 52, 48, 0.04);
+  --shadow-hero:
+    0 2px 4px color-mix(in srgb, var(--palette-espresso), transparent 92%),
+    0 28px 72px color-mix(in srgb, var(--palette-espresso), transparent 88%);
+}
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-page: #090b11;
+  --surface-warm: #0c0f15;
+  --surface-warm-sunken: #12161f;
+  --surface-warm-raised: #1a202c;
+  --surface-card: #0e121a;
+  --surface-hover: #151b26;
+  --surface-header: rgba(9, 11, 17, 0.88);
+  --canvas-bg: #0c0f15;
+  --editor-paper: #11151e;
+  --editor-paper-border: #1e2430;
+
+  --content-strong: #f6f4f2;
+  --content-default: #dcd7d2;
+  --content-muted: #9b9590;
+  --content-subtle: #706b67;
+
+  --brand-accent: #3f90ce;
+  --brand-accent-strong: #6cb4eb;
+  --brand-accent-soft: rgba(63, 144, 206, 0.16);
+  --brand-on-accent: #ffffff;
+
+  --warm-border: #1e2430;
+  --warm-border-strong: #2c3445;
+  --v3-rule: rgba(180, 194, 214, 0.14);
+
+  --diff-insert-text: #50b173;
+  --diff-delete-text: #f87171;
+  --diff-insert-wash: rgba(80, 177, 115, 0.12);
+  --diff-delete-wash: rgba(248, 113, 113, 0.14);
+  --diff-insert-border: rgba(80, 177, 115, 0.3);
+  --diff-delete-border: rgba(248, 113, 113, 0.3);
+
+  --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.25);
+  --shadow-hero:
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    0 28px 72px rgba(0, 0, 0, 0.55);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--surface-page);
+  color: var(--content-default);
+  font-family: var(--font-ui);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+}
