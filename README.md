@@ -1,11 +1,12 @@
-# Redline Congress
+<a href="https://redlinecongress.org"><img src="logo.png" alt="RedlineCongress.org" width="240"></a>
 
-Word-level redlines between every published version of U.S. Congressional bills.
-Live at [redlinecongress.org](https://redlinecongress.org).
+What is changing in bills as they move through Congress? It's surprisingly hard to find out.
 
-Bill text comes from [Congress.gov](https://www.congress.gov) and
-[GovInfo](https://www.govinfo.gov). Documents are diffed and rendered with the
-[Revise SDK](https://revise.io/sdk) (`revise` on npm). The app runs on
+[RedlineCongress.org](https://redlinecongress.org) is a public mirror of legislation that lets you see redlines on bills between any two stages.
+
+Bill text comes from [Congress.gov](https://www.congress.gov) &
+[GovInfo](https://www.govinfo.gov) APIs. Documents are rendered with the
+[Revise SDK](https://revise.io/sdk) (`revise` on npm). Hosted on
 Cloudflare Workers with D1.
 
 ## Run locally
