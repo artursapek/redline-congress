@@ -145,6 +145,8 @@ async function mergeStoredHistory(
   env: Env,
   listed: BillSummary[],
   ctx?: BackgroundCtx,
+  /** How many unknown bills to store in the background per call. */
+  hydrate = 4,
 ): Promise<BillSummary[]> {
   const stored = await getBillsByIds(env.DB, listed.map((b) => b.id));
   const merged = listed.map((item) => {
@@ -162,7 +164,7 @@ async function mergeStoredHistory(
     };
   });
   if (ctx) {
-    const missing = merged.filter((b) => b.versions.length === 0).slice(0, 4);
+    const missing = merged.filter((b) => b.versions.length === 0).slice(0, hydrate);
     if (missing.length > 0) {
       ctx.waitUntil(
         Promise.all(
@@ -259,6 +261,68 @@ async function noteworthyBills(env: Env): Promise<BillSummary[]> {
     .sort((a, b) => activity(b).localeCompare(activity(a)));
 }
 
+/**
+ * Latest text versions that don't make a bill "active" for the homepage:
+ * introduced-only stages, and simple resolutions agreed to as introduced
+ * (commemorative S.Res./H.Res. with a single version and nothing to redline).
+ */
+const NOT_ACTIVE_STAGES = new Set(["ih", "is", "ihr", "isr", "ash", "rch", "rcs", "ats", "ath"]);
+
+/**
+ * JSON-serializable result cached in the Workers Cache API for `ttlSeconds`.
+ * Used for GovInfo searches, which are POSTs and so skip Cloudflare's fetch cache.
+ */
+async function cachedJson<T>(key: string, ttlSeconds: number, load: () => Promise<T>): Promise<T> {
+  const cache = (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default;
+  const req = new Request(`https://cache.redlinecongress.internal/${encodeURIComponent(key)}`);
+  if (cache) {
+    const hit = await cache.match(req);
+    if (hit) return (await hit.json()) as T;
+  }
+  const value = await load();
+  if (cache) {
+    await cache.put(
+      req,
+      new Response(JSON.stringify(value), {
+        headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${ttlSeconds}` },
+      }),
+    );
+  }
+  return value;
+}
+
+/**
+ * "Recently active": bills whose newest published text is past introduction
+ * (reported, passed, amended, enrolled…), newest first, straight from GovInfo.
+ * Doesn't depend on what the sync job happened to store, so it's complete
+ * everywhere (including local dev, where the cron never runs).
+ */
+async function recentlyActiveBills(
+  env: Env,
+  limit: number,
+  ctx?: BackgroundCtx,
+): Promise<BillSummary[]> {
+  const apiKey = env.CONGRESS_API_KEY!;
+  const listed = await cachedJson(`recently-active:v2:${CURRENT_CONGRESS}:${limit}`, 300, async () => {
+    const out: BillSummary[] = [];
+    const seen = new Set<string>();
+    let after: string | null = null;
+    // A batch of 100 text versions usually holds ~25–40 that are past introduction.
+    for (let batch = 0; batch < 4 && out.length < limit; batch++) {
+      const page = await fetchRecentlyPublishedBills(CURRENT_CONGRESS, null, after, apiKey, 100);
+      for (const b of page.bills) {
+        if (seen.has(b.id) || NOT_ACTIVE_STAGES.has(b.latestVersionCode ?? "")) continue;
+        seen.add(b.id);
+        out.push(b);
+      }
+      if (!page.nextAfter) break;
+      after = page.nextAfter;
+    }
+    return out.slice(0, limit);
+  });
+  return mergeStoredHistory(env, listed, ctx, 10);
+}
+
 /** One homepage feed tab's bills (shared by the API and server rendering). */
 async function homeFeed(
   env: Env,
@@ -278,6 +342,17 @@ async function homeFeed(
       return { bills: laws.bills, syncedAt: null, total: laws.total, source: "live", feed };
     } catch (err) {
       console.error("Congress.gov law list failed, using D1:", err);
+    }
+  }
+
+  if (feed === "active" && env.CONGRESS_API_KEY && offset === 0) {
+    try {
+      const bills = await recentlyActiveBills(env, Math.min(Math.max(limit, 1), 60), ctx);
+      if (bills.length > 0) {
+        return { bills, syncedAt: null, total: bills.length, source: "live", feed };
+      }
+    } catch (err) {
+      console.error("GovInfo recently-active list failed, using D1:", err);
     }
   }
 

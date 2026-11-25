@@ -36,6 +36,7 @@ import { compareParsedBills, resolveBillRevisions } from "../lib/billXml/diff";
 import { serializeBillToDocxBlob } from "../lib/billXml/docxWriter";
 import { parseCongressionalXml } from "../lib/billXml/parser";
 import type { BillSectionRef, ParsedBill } from "../lib/billXml/types";
+import { useDiffStyle } from "../lib/diffStyle";
 import { getInitialData } from "../lib/initialData";
 import { useTheme } from "../lib/theme";
 import type { SuggestionViewMode } from "../components/ReviseBillCanvas";
@@ -223,7 +224,7 @@ export const BillViewerPage: React.FC = () => {
   // is an explicit comparison and turns it back on.
   const [showChanges, setShowChanges] = useState(true);
   const viewMode: SuggestionViewMode = showChanges ? "all-markup" : "final";
-  const [markupStyle, setMarkupStyle] = useState<"revise" | "word">("revise");
+  const [markupStyle, setMarkupStyle] = useDiffStyle();
   const [rightTab, setRightTab] = useState<"history" | "changes">("history");
   const [changedSectionsOnly, setChangedSectionsOnly] = useState(false);
   const [activeSectionSlug, setActiveSectionSlug] = useState<string | null>(() =>

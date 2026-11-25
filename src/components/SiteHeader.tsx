@@ -65,8 +65,15 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
         <div className="rc-header-left">
           <Link to="/" className="rc-brand" aria-label={SITE_NAME}>
             <CapitolMark className="rc-brand-mark" />
-            <span className={hasPage ? "rc-brand-name rc-hide-sm" : "rc-brand-name"}>
-              {SITE_NAME}
+            {/* The name itself is redlined: "Redline" struck out, "Congress" inserted.
+                Colors follow the visitor's diff style (see .rc-brand-* in app.css). */}
+            <span
+              className={hasPage ? "rc-brand-name rc-hide-sm" : "rc-brand-name"}
+              aria-hidden="true"
+            >
+              <span className="rc-brand-del">Redline</span>
+              <span className="rc-brand-ins">Congress</span>
+              .org
             </span>
           </Link>
 

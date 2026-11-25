@@ -168,7 +168,7 @@ export function renderBillSsr(
     <header class="rc-header rc-header--full">
       <div class="rc-header-inner">
         <div class="rc-header-left">
-          <a href="/" class="rc-brand" aria-label="RedlineCongress.org"><svg class="rc-brand-mark" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${CAPITOL_MARK_SVG_INNER}</svg><span class="rc-brand-name rc-hide-sm">RedlineCongress.org</span></a>
+          <a href="/" class="rc-brand" aria-label="RedlineCongress.org"><svg class="rc-brand-mark" width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${CAPITOL_MARK_SVG_INNER}</svg><span class="rc-brand-name rc-hide-sm" aria-hidden="true"><span class="rc-brand-del">Redline</span><span class="rc-brand-ins">Congress</span>.org</span></a>
           <span class="rc-header-sep rc-hide-sm" aria-hidden="true">/</span>
           <span class="rc-header-page-label">${escHtml(numLabel)}</span>
           <h1 class="rc-header-page-title" style="margin:0;font-weight:400">${escHtml(bill.title)}</h1>

@@ -32,6 +32,10 @@
             document.documentElement.classList.add("dark");
             document.documentElement.setAttribute("data-theme", "dark");
           }
+          // Diff style (Red/Green vs All red) also styles the redlined brand name.
+          if (localStorage.getItem("rc-diff-style") === "word") {
+            document.documentElement.setAttribute("data-diff-style", "word");
+          }
         } catch (e) {}
       })();
     </script>

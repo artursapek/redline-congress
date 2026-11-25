@@ -1729,3 +1729,60 @@
 .rc-demo-paper .rc-demo-indent {
   padding-left: 1.5em;
 }
+
+/* ── Redlined brand name: "Redline" deleted, "Congress" inserted ──────────
+   Matches how the Revise editor paints tracked changes on its canvas
+   (frontend/src/editor/blocks/TextBlockUtils.ts in revise):
+   - Red/Green: deletion = red text + red 10% wash + strikethrough
+     (max(1, round(0.04em)) thick at baseline − 0.3em); insertion = green text
+     + green 6% wash, no underline.
+   - All red: both red, no washes; insertion gets a 1px underline 2px below
+     the baseline.
+   - The editor's wash spans baseline − 0.7em to + 0.2em, sized for its serif
+     body text. Inter's caps/ascenders are taller (~0.75em), so the brand's band
+     starts higher: baseline − 0.85em to + 0.2em. Inline backgrounds cover the
+     font's content box (Inter: ascent ≈ 0.97em, descent ≈ 0.24em), hence
+     0.12em from the top and 1.05em tall. */
+.rc-brand-name {
+  --brand-del-text: #cf2a2a;
+  --brand-del-wash: rgb(207 42 42 / 0.1);
+  --brand-ins-text: #0b8237;
+  --brand-ins-wash: rgb(34 197 94 / 0.06);
+}
+
+[data-theme="dark"] .rc-brand-name {
+  --brand-del-text: #f87171;
+  --brand-del-wash: rgb(248 113 113 / 0.1);
+  --brand-ins-text: #50b173;
+  --brand-ins-wash: rgb(80 177 115 / 0.06);
+}
+
+.rc-brand-del,
+.rc-brand-ins {
+  background-repeat: no-repeat;
+  background-size: 100% 1.05em;
+  background-position: 0 0.12em;
+}
+
+.rc-brand-del {
+  color: var(--brand-del-text);
+  background-image: linear-gradient(var(--brand-del-wash), var(--brand-del-wash));
+  text-decoration: line-through 1px var(--brand-del-text);
+}
+
+.rc-brand-ins {
+  color: var(--brand-ins-text);
+  background-image: linear-gradient(var(--brand-ins-wash), var(--brand-ins-wash));
+}
+
+/* All red (Word-style redline). */
+[data-diff-style="word"] .rc-brand-del,
+[data-diff-style="word"] .rc-brand-ins {
+  background-image: none;
+}
+
+[data-diff-style="word"] .rc-brand-ins {
+  color: var(--brand-del-text);
+  text-decoration: underline 1px var(--brand-del-text);
+  text-underline-offset: 2px;
+}
