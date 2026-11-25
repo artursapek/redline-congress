@@ -312,6 +312,75 @@ function applyChangeMark(runs: BillRun[], mark: BillChangeMark): BillRun[] {
   return runs.map((r) => ({ ...r, change: mark }));
 }
 
+/** A run of tokens that is either unchanged (equal) or changed, in both sequences. */
+interface DiffSpan {
+  equal: boolean;
+  a0: number;
+  a1: number;
+  b0: number;
+  b1: number;
+}
+
+function spansFromPairs(pairs: Array<[number, number]>, lenA: number, lenB: number): DiffSpan[] {
+  const spans: DiffSpan[] = [];
+  let ai = 0;
+  let bi = 0;
+  const push = (span: DiffSpan) => {
+    const last = spans[spans.length - 1];
+    if (last && last.equal === span.equal) {
+      last.a1 = span.a1;
+      last.b1 = span.b1;
+    } else {
+      spans.push({ ...span });
+    }
+  };
+  for (const [i, j] of pairs) {
+    if (ai < i || bi < j) push({ equal: false, a0: ai, a1: i, b0: bi, b1: j });
+    push({ equal: true, a0: i, a1: i + 1, b0: j, b1: j + 1 });
+    ai = i + 1;
+    bi = j + 1;
+  }
+  if (ai < lenA || bi < lenB) push({ equal: false, a0: ai, a1: lenA, b0: bi, b1: lenB });
+  return spans;
+}
+
+/** Visible characters in a token range (whitespace doesn't count). */
+function spanChars(tokens: Token[], from: number, to: number): number {
+  let n = 0;
+  for (let k = from; k < to; k++) if (!tokens[k].isSpace) n += tokens[k].raw.length;
+  return n;
+}
+
+/**
+ * Semantic cleanup (in the spirit of diff-match-patch's cleanupSemantic).
+ * A word-level LCS happily matches stray common words ("the", "to", "of")
+ * inside a rewritten clause, chopping it into alternating red/green confetti.
+ * Any unchanged stretch that is no longer than the edits on BOTH sides of it
+ * is absorbed into a single change, so a rewrite reads as one deletion and
+ * one insertion, while substantial shared text still shows as unchanged.
+ */
+function semanticCleanup(spans: DiffSpan[], a: Token[], b: Token[]): DiffSpan[] {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let i = 1; i < spans.length - 1; i++) {
+      const eq = spans[i];
+      const prev = spans[i - 1];
+      const next = spans[i + 1];
+      if (!eq.equal || prev.equal || next.equal) continue;
+      const eqLen = spanChars(b, eq.b0, eq.b1);
+      const prevLen = Math.max(spanChars(a, prev.a0, prev.a1), spanChars(b, prev.b0, prev.b1));
+      const nextLen = Math.max(spanChars(a, next.a0, next.a1), spanChars(b, next.b0, next.b1));
+      if (eqLen <= prevLen && eqLen <= nextLen) {
+        spans.splice(i - 1, 3, { equal: false, a0: prev.a0, a1: next.a1, b0: prev.b0, b1: next.b1 });
+        changed = true;
+        i = Math.max(0, i - 2);
+      }
+    }
+  }
+  return spans;
+}
+
 /** Word-level diff between two matched paragraphs. */
 function diffParagraphRuns(
   before: BillParagraph,
@@ -328,51 +397,34 @@ function diffParagraphRuns(
     MAX_WORD_DP_PAIRS,
   );
 
+  const spans = semanticCleanup(
+    spansFromPairs(pairs, beforeTokens.length, afterTokens.length),
+    beforeTokens,
+    afterTokens,
+  );
+
   const out: BillRun[] = [];
-  let ai = 0;
-  let bi = 0;
-
-  const flushChangeSpan = (endA: number, endB: number) => {
-    if (ai < endA) {
-      const delMark: BillChangeMark = {
-        kind: "delete",
-        id: nextChangeId(),
-        ...(author ? { author } : {}),
-      };
-      for (let k = ai; k < endA; k++) {
-        out.push({
-          ...beforeTokens[k].marks,
-          text: beforeTokens[k].raw,
-          change: delMark,
-        });
+  for (const span of spans) {
+    if (span.equal) {
+      for (let k = span.b0; k < span.b1; k++) {
+        out.push({ ...afterTokens[k].marks, text: afterTokens[k].raw });
+      }
+      continue;
+    }
+    // A change reads as one deletion followed by one insertion.
+    if (span.a0 < span.a1) {
+      const delMark: BillChangeMark = { kind: "delete", id: nextChangeId(), ...(author ? { author } : {}) };
+      for (let k = span.a0; k < span.a1; k++) {
+        out.push({ ...beforeTokens[k].marks, text: beforeTokens[k].raw, change: delMark });
       }
     }
-    if (bi < endB) {
-      const insMark: BillChangeMark = {
-        kind: "insert",
-        id: nextChangeId(),
-        ...(author ? { author } : {}),
-      };
-      for (let k = bi; k < endB; k++) {
-        out.push({
-          ...afterTokens[k].marks,
-          text: afterTokens[k].raw,
-          change: insMark,
-        });
+    if (span.b0 < span.b1) {
+      const insMark: BillChangeMark = { kind: "insert", id: nextChangeId(), ...(author ? { author } : {}) };
+      for (let k = span.b0; k < span.b1; k++) {
+        out.push({ ...afterTokens[k].marks, text: afterTokens[k].raw, change: insMark });
       }
     }
-  };
-
-  for (const [mi, mj] of pairs) {
-    flushChangeSpan(mi, mj);
-    out.push({
-      ...afterTokens[mj].marks,
-      text: afterTokens[mj].raw,
-    });
-    ai = mi + 1;
-    bi = mj + 1;
   }
-  flushChangeSpan(beforeTokens.length, afterTokens.length);
 
   return {
     ...after,
