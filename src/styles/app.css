@@ -640,8 +640,9 @@
   font-size: 11px;
   font-weight: 600;
   line-height: 16px;
-  padding: 3px 8px 3px 6px;
-  border-radius: 999px;
+  /* Same shape as .rc-stage-pill: 22px tall, 5px corners. */
+  padding: 3px 8px 3px 7px;
+  border-radius: 5px;
   background: var(--diff-insert-text);
   color: #fff;
   white-space: nowrap;
@@ -1429,9 +1430,11 @@
   display: inline-flex;
 }
 
+/* Timeline: match the smaller .rc-timeline-code badges (4px corners). */
 .rc-timeline-law-badge .rc-law-badge {
-  padding: 2px 7px 2px 5px;
+  padding: 1px 6px 1px 5px;
   font-size: 10.5px;
+  border-radius: 4px;
 }
 
 /* ── Homepage feed tabs (chromeless: text only, underline on selected) ── */
