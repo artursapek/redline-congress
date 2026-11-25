@@ -1,0 +1,71 @@
+name: Deploy
+
+# Deploys the Worker to Cloudflare whenever main changes.
+# Runs only for pushes to this repository's main branch (and manual runs), never
+# for pull requests, so forks can't reach the secrets below.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN        API token with Workers Scripts:Edit, D1:Edit,
+#                               Workers R2 Storage:Edit (account) and
+#                               Workers Routes:Edit (zone).
+#   CLOUDFLARE_ACCOUNT_ID       Cloudflare account ID.
+#   WRANGLER_PRODUCTION_CONFIG  Full contents of wrangler.production.jsonc
+#                               (real D1 database_id and routes; kept out of git).
+# Runtime secrets such as CONGRESS_API_KEY live on the Worker itself
+# (`wrangler secret put`), not here.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "logo.png"
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits for the running one instead of racing it.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.repository == 'artursapek/redline-congress'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test and typecheck
+        run: |
+          npm test
+          npm run typecheck
+
+      - name: Write production Wrangler config
+        env:
+          WRANGLER_PRODUCTION_CONFIG: ${{ secrets.WRANGLER_PRODUCTION_CONFIG }}
+        run: |
+          if [ -z "$WRANGLER_PRODUCTION_CONFIG" ]; then
+            echo "::error::WRANGLER_PRODUCTION_CONFIG secret is not set"
+            exit 1
+          fi
+          printf '%s' "$WRANGLER_PRODUCTION_CONFIG" > wrangler.production.jsonc
+
+      - name: Apply D1 migrations
+        run: npm run db:migrate:remote
+
+      - name: Deploy
+        run: npm run deploy

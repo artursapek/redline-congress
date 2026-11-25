@@ -7,3 +7,5 @@ dist/
 *.log
 .DS_Store
 wrangler.production.jsonc
+secrets.env
+*.env
