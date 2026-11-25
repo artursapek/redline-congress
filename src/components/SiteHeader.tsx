@@ -5,6 +5,7 @@ import { useTheme } from "../lib/theme";
 import { CapitolMark } from "./CapitolMark";
 
 export const SITE_NAME = "RedlineCongress.org";
+export const REPO_URL = "https://github.com/artursapek/redline-congress";
 
 export interface HeaderCrumb {
   label: string;
@@ -140,15 +141,16 @@ export const SiteHeader: React.FC<SiteHeaderProps> = ({
           >
             {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
           </button>
-          {/* Placeholder until the repo is public: no link yet. */}
-          <button
-            type="button"
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             className="rc-btn rc-btn-secondary rc-btn-sm rc-github-btn"
-            title="GitHub (coming soon)"
+            title="Source code on GitHub"
           >
             <Github size={14} />
             <span>GitHub</span>
-          </button>
+          </a>
         </div>
       </div>
     </header>
