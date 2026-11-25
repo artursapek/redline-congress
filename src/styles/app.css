@@ -765,32 +765,32 @@
   flex-wrap: wrap;
 }
 
+/* "Copy link to text": same look as the secondary download buttons
+   (white fill, neutral border), with room before the Show diff switch. */
 .rc-copy-selection-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 28px;
+  height: 30px;
   padding: 0 10px;
+  margin-right: 16px;
   border-radius: 7px;
-  border: 1px solid rgba(63, 144, 206, 0.36);
-  background: rgba(63, 144, 206, 0.11);
-  color: var(--azure);
-  font-size: 12px;
-  font-weight: 600;
+  border: 1px solid var(--warm-border-strong);
+  background: var(--surface-card);
+  color: var(--content-strong);
+  font-size: 12.5px;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 
 .rc-copy-selection-btn:hover {
-  background: rgba(63, 144, 206, 0.18);
-  border-color: rgba(63, 144, 206, 0.55);
+  background: var(--surface-warm);
 }
 
 .rc-copy-selection-btn.is-copied {
-  border-color: rgba(22, 163, 74, 0.42);
-  background: rgba(22, 163, 74, 0.12);
-  color: var(--insert-ink);
+  color: var(--diff-insert-text);
 }
 
 .rc-select {
