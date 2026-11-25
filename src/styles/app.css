@@ -90,7 +90,7 @@
 .rc-header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
@@ -987,7 +987,7 @@
   background: var(--brand-accent-soft);
 }
 
-.rc-timeline-dot[data-endpoint="true"] {
+.rc-timeline-dot[data-endpoint="current"] {
   border-color: var(--brand-accent);
   background: var(--brand-accent);
   transform: scale(1.1);
@@ -1016,7 +1016,7 @@
   border-color: color-mix(in srgb, var(--brand-accent), transparent 76%);
 }
 
-.rc-timeline-row[data-endpoint="true"] .rc-timeline-card {
+.rc-timeline-row[data-endpoint="current"] .rc-timeline-card {
   background: var(--brand-accent-soft);
   border-color: color-mix(in srgb, var(--brand-accent), transparent 48%);
 }
@@ -1035,7 +1035,7 @@
   line-height: 1.35;
 }
 
-.rc-timeline-row[data-endpoint="true"] .rc-timeline-stage {
+.rc-timeline-row[data-endpoint] .rc-timeline-stage {
   color: var(--content-strong);
 }
 
@@ -1051,7 +1051,7 @@
   flex-shrink: 0;
 }
 
-.rc-timeline-row[data-endpoint="true"] .rc-timeline-code {
+.rc-timeline-row[data-endpoint="current"] .rc-timeline-code {
   background: var(--brand-accent);
   color: var(--brand-on-accent);
 }
@@ -1785,4 +1785,26 @@
   color: var(--brand-del-text);
   text-decoration: underline 1px var(--brand-del-text);
   text-underline-offset: 2px;
+}
+
+/* The version being compared to: blue outline only, hollow dot, "Comparing to" tag. */
+.rc-timeline-dot[data-endpoint="compare"] {
+  border-color: var(--brand-accent);
+  background: var(--surface-page);
+}
+
+.rc-timeline-row[data-endpoint="compare"] .rc-timeline-card {
+  background: transparent;
+  border-color: var(--brand-accent);
+}
+
+.rc-timeline-compare-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 16px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-strong);
+  white-space: nowrap;
 }

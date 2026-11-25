@@ -184,7 +184,7 @@ export const VersionTimeline: React.FC<VersionTimelineProps> = ({
           </span>
         ) : versions.length >= 2 ? (
           <span>
-            {showChanges ? "Click a stage to diff · Drag to span" : "Click a stage to view · Drag to compare"}
+            Click or drag to see versions
           </span>
         ) : (
           <span>1 published version</span>
@@ -205,6 +205,9 @@ export const VersionTimeline: React.FC<VersionTimelineProps> = ({
           const isInRange =
             isRange && idx > rangeStart && idx < rangeEnd;
           const isEndpoint = isSingleSelected || isRangeStart || isRangeEnd;
+          // The newer end is the version being viewed (full blue); the older end
+          // is what it's compared to (blue outline + "Comparing to").
+          const endpointKind = isSingleSelected || isRangeEnd ? "current" : isRangeStart ? "compare" : undefined;
 
           const topActive = isRange && idx > rangeStart && idx <= rangeEnd;
           const bottomActive = isRange && idx >= rangeStart && idx < rangeEnd;
@@ -216,7 +219,7 @@ export const VersionTimeline: React.FC<VersionTimelineProps> = ({
               tabIndex={0}
               aria-selected={isEndpoint || isInRange}
               className="rc-timeline-row"
-              data-endpoint={isEndpoint ? "true" : undefined}
+              data-endpoint={endpointKind}
               data-in-range={isInRange ? "true" : undefined}
               data-single={isSingleSelected ? "true" : undefined}
               onPointerDown={(e) => handleRowPointerDown(idx, e)}
@@ -238,7 +241,7 @@ export const VersionTimeline: React.FC<VersionTimelineProps> = ({
                 />
                 <span
                   className="rc-timeline-dot"
-                  data-endpoint={isEndpoint ? "true" : undefined}
+                  data-endpoint={endpointKind}
                   data-in-range={isInRange ? "true" : undefined}
                 />
                 <span
@@ -259,6 +262,9 @@ export const VersionTimeline: React.FC<VersionTimelineProps> = ({
 
                 <div className="rc-timeline-card-meta">
                   {ver.date && <span>{formatShortDate(ver.date)}</span>}
+                  {endpointKind === "compare" && (
+                    <span className="rc-timeline-compare-tag">Comparing to</span>
+                  )}
                   {showsLaw && enactedLaw && (
                     <span className="rc-timeline-law-badge">
                       <LawBadge
